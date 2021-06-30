@@ -273,6 +273,12 @@ Q_SIGNALS:
      */
     void connectionRejected();
 
+    /**
+     * @brief Emitted when a socket has been disconnected.
+     * @param socketDescriptor Socket descriptor
+     */
+    void socketDisconnected(qintptr socketDescriptor);
+
 protected:
 #if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
     /*! \reimp \internal */ void incomingConnection(qintptr socketDescriptor) override;
@@ -280,9 +286,10 @@ protected:
     /*! \reimp \internal */ void incomingConnection(int socketDescriptor) override;
 #endif
 
+    virtual void log(const QByteArray &text);
+
 private:
     friend class KDSoapServerSocket;
-    void log(const QByteArray &text);
     class Private;
     Private *const d;
 };

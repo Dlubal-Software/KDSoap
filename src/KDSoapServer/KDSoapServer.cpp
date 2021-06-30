@@ -107,7 +107,8 @@ void KDSoapServer::incomingConnection(int socketDescriptor)
         if (!d->m_mainThreadSocketList) {
             d->m_mainThreadSocketList = new KDSoapSocketList(this /*server*/);
         }
-        d->m_mainThreadSocketList->handleIncomingConnection(socketDescriptor);
+        KDSoapServerSocket* socket = d->m_mainThreadSocketList->handleIncomingConnection(socketDescriptor);
+        connect(socket, &KDSoapServerSocket::disconnected, [this, socket]() { emit socketDisconnected(socket->socketDescriptor()); });
     }
 }
 
