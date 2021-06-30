@@ -9,6 +9,7 @@
 ****************************************************************************/
 #include "KDSoapServer.h"
 #include "KDSoapSocketList_p.h"
+#include "KDSoapServerSocket_p.h"
 #include "KDSoapThreadPool.h"
 #include <QFile>
 #include <QMutex>
@@ -90,7 +91,8 @@ void KDSoapServer::incomingConnection(qintptr socketDescriptor)
         if (!d->m_mainThreadSocketList) {
             d->m_mainThreadSocketList = new KDSoapSocketList(this /*server*/);
         }
-        d->m_mainThreadSocketList->handleIncomingConnection(socketDescriptor);
+        KDSoapServerSocket* socket = d->m_mainThreadSocketList->handleIncomingConnection(socketDescriptor);
+        connect(socket, &KDSoapServerSocket::disconnected, [this, socket]() { emit socketDisconnected(socket->socketDescriptor()); });
     }
 }
 
