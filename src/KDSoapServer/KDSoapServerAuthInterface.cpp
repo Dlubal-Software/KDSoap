@@ -28,7 +28,8 @@ enum Method
     Login,
     Ntlm,
     CramMd5,
-    DigestMd5
+    DigestMd5,
+    Bearer,
 };
 static void parseAuthLine(const QString &str, Method *method, QString *headerVal)
 {
@@ -46,6 +47,9 @@ static void parseAuthLine(const QString &str, Method *method, QString *headerVal
         *headerVal = str.mid(5);
     } else if (*method < DigestMd5 && str.startsWith(QLatin1String("Digest"), Qt::CaseInsensitive)) {
         *method = DigestMd5;
+        *headerVal = str.mid(7);
+    } else if (*method < Bearer && str.startsWith(QLatin1String("Bearer"), Qt::CaseInsensitive)) {
+        *method = Bearer;
         *headerVal = str.mid(7);
     }
 }
@@ -76,6 +80,12 @@ bool KDSoapServerAuthInterface::handleHttpAuth(const QByteArray &authValue, cons
             }
             authSettings.setUser(QString::fromUtf8(userPass.left(separatorPos).constData()));
             authSettings.setPassword(QString::fromUtf8(userPass.mid(separatorPos + 1).constData()));
+            authOk = validateAuthentication(authSettings, path);
+            break;
+        }
+        case Bearer: {
+            authSettings.setUser(headerVal);
+            authSettings.setUseWSUsernameToken(true);
             authOk = validateAuthentication(authSettings, path);
             break;
         }
